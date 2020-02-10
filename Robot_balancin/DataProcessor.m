@@ -157,7 +157,7 @@ classdef DataProcessor
           subplot(4,2,[3,5])
           h = bodeplot(cart.angleFunction);
           options = getoptions(h);
-          options.Title.String = 'Diagrama de Bode';
+          options.Title.String = 'Diagrama de Bode de G_{loop,\theta} (s)';
           options.Title.FontSize = 10;
           options.XLabel.String = 'Frecuencia';
           options.XLabel.FontSize = 10;
@@ -171,10 +171,18 @@ classdef DataProcessor
           title('Distribuciones')
           obj.drawDistribution();
           p = get(gca,'Position');
-          p(2) = p(2)-0.08;
+          p(2) = p(2)-0.06;
           set(gca,'Position',p);
           hold off 
           
+       end
+       
+       function rpm = getRPM(obj,robot)
+          %This function will calculate the rpm 
+          deltaT = diff(obj.t');
+          velocity = diff(obj.position)./ deltaT;
+          velocity = [velocity;velocity(end)];
+          rpm = velocity *(60/(2*pi*robot.radiusWheels));
        end
   
        

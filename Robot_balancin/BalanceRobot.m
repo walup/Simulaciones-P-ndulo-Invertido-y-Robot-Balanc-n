@@ -74,7 +74,13 @@ classdef BalanceRobot
        
        %Function to obtain an order 2 form of the transfer function
        function reducedTransf = getReducedTransf(obj)
-           reducedTransf = balred(obj.angleFunction,2);
+          %Get the poles 
+          poles = pole(obj.angleFunction);
+          %Take out the pole with the biggest real part 
+          poles = poles(abs(real(poles)) < max(abs(real(poles))));
+          s = tf('s');
+          %Return the reduced transfer function with the removed pole 
+          reducedTransf = s/((s-poles(1))*(s-poles(2)));
        end
        
        function [behaviorType,poles] = getStabilityType(obj)
@@ -161,12 +167,26 @@ classdef BalanceRobot
           xVals = points(:,1);
           yVals = points(:,2);
           par = polyfit(xVals,yVals,2);
+          %Print the parabola coefficients 
+          [c1,c2,c3] = obj.getParabolaCoefficients(par,KI);
           yCalcVals = polyval(par,xVals);
           figure()
           hold on
-          title("Parabola m = "+num2str(obj.massChasis+2*obj.massWheels)+"l = "+num2str(obj.l)+" radio = "+num2str(obj.radiusWheels))
+          %Get the axis
+          a = gca;
+          a.Position(4) = 0.6;
+          a.Position(2) = 0.3;
+          title("Parabola m = "+num2str(obj.massChasis+2*obj.massWheels)+" l = "+num2str(obj.l)+" radio = "+num2str(obj.radiusWheels))
+          patch([xVals',flip(xVals')],[yCalcVals',ones(1,length(yCalcVals'))*min(yCalcVals)],[251, 105, 86]/255,'FaceAlpha',0.5);
+          patch([xVals',flip(xVals')],[yCalcVals',ones(1,length(yCalcVals'))*max(yCalcVals)],[54, 191, 199]/255,'FaceAlpha',0.5);
           plot(xVals,yVals,'o')
           plot(xVals,yCalcVals)
+          text(85,30,'Subamortiguado')
+          text(150,30,'Sobreamortiguado')
+          text(127,30,'Crítico \rightarrow');
+          annotation('textbox', [0.1, 0.1, 0.1, 0.1], 'String', "Coeficientes de la parábola:      c_{1} = "+num2str(c1)+"     c_{2} =  "+num2str(c2)+"      c_{3} =  "+num2str(c3),'FontWeight','bold')
+          xlim([min(xVals),max(xVals)])
+          ylim([min(yCalcVals),max(yCalcVals)])
           xlabel('Kp')
           ylabel('Kd')
           hold off
@@ -193,6 +213,18 @@ classdef BalanceRobot
             torque = obj.radiusWheels*((obj.massChasis+2*obj.massWheels+(2*obj.inertiaWheels/obj.radiusWheels^2))*acceleration - obj.massChasis*obj.l*angularAcceleration);
            %Obtain th energy
            energy = (1/2)*obj.massChasis*velocity.^2 -obj.massChasis*obj.l*angularVelocity.*velocity.*cos(angle) +(1/2)*obj.massChasis*angularVelocity.^2*obj.l^2 +(1/2)*obj.inertiaChasis*angularVelocity.^2 +obj.massWheels*velocity.^2 +(1/obj.radiusWheels^2)*obj.inertiaWheels*velocity.^2 +2*obj.massChasis*obj.g*obj.radiusWheels +obj.massChasis*obj.g*(obj.radiusWheels +obj.l*cos(angle));
+       end
+       
+       function [c1,c2,c3] = getParabolaCoefficients(obj,par,ki)
+          %par has three coefficients and it sets the structure of a
+          %parabola of the form y = a1x^2 +a2x+a3
+          a1 = par(1);
+          a2 = par(2);
+          a3 = par(3);
+           
+          c1 = a2/(2*a1);
+          c2 = (a1/4)-ki;
+          c3 = (a2^2/(4*a1))-a3;
        end
    end
     

@@ -6,16 +6,13 @@ classdef InvertedPendulum
        m;
        l;
        g;
-       
        %Control parameters
        kp;
        ki;
        kd;
-       
        %Transfer functions (model)
        positionFunction;
-       angleFunction;
-       
+       angleFunction;       
        %Period of the pendulum to be able to use natural units
        T;
     end
@@ -46,7 +43,7 @@ classdef InvertedPendulum
            %Set the closed loop transfer functions
            s = tf('s');
            obj.angleFunction = s/(ki + kp*s + kd*s^2 - obj.M*obj.g*s - obj.g*obj.m*s + obj.M*obj.l*s^3);
-           obj.positionFunction = -(- obj.l*s^2 + obj.g)/(s*(ki + kp*s + kd*s^2 - obj.M*obj.g*s - obj.g*obj.m*s + obj.M*obj.l*s^3));
+           obj.positionFunction = -(- obj.l*s^2 + obj.g)/(obj.l*obj.M*s^4 +obj.kd*s^3 +(obj.kp -obj.g*(obj.m +obj.M))*s^2 +obj.ki*s);
        end
        
        %Sets only the angle loop transfer function
@@ -59,7 +56,13 @@ classdef InvertedPendulum
        %model of order 2 for the closed loop angle
        %transfer function
        function reducedTransf = getReducedTransf(obj)
-          reducedTransf = balred(obj.angleFunction,2); 
+          %Get the poles 
+          poles = pole(obj.angleFunction);
+          %Take out the pole with the biggest real part 
+          poles = poles(abs(real(poles)) < max(abs(real(poles))));
+          s = tf('s');
+          %Return the reduced transfer function with the removed pole 
+          reducedTransf = s/((s-poles(1))*(s-poles(2)));
        end
        
        %This function will get the stability type of a
@@ -150,14 +153,29 @@ classdef InvertedPendulum
            yVals = points(:,2);
            %Adjust the parabola to them
            par = polyfit(xVals,yVals,2);
+           %Get the parabola coefficients 
+           [c1,c2,c3] = obj.getParabolaCoefficients(par,ki);
            yCalcVals = polyval(par,xVals);
            figure()
+           %The parabola plot
            hold on
+           a = gca;
+           a.Position(4) = 0.6;
+           a.Position(2) = 0.3;
            title("Parabola m = "+num2str(obj.m)+" M = "+num2str(obj.M)+" l = "+num2str(obj.l))
+           %Area under the plot to mark the overdamped region
+           patch([xVals',flip(xVals')],[yCalcVals',ones(1,length(yCalcVals'))*min(yCalcVals)],[251, 105, 86]/255,'FaceAlpha',0.5);
+           patch([xVals',flip(xVals')],[yCalcVals',ones(1,length(yCalcVals'))*max(yCalcVals)],[54, 191, 199]/255,'FaceAlpha',0.5);
            plot(xVals,yVals,'o')
            plot(xVals,yCalcVals)
+           text(100,30,'Subamortiguado')
+           text(180,30,'Sobreamortiguado')
+           text(142,30,'Crítico \rightarrow');
+           annotation('textbox', [0.1, 0.1, 0.1, 0.1], 'String', "Coeficientes de la parábola:      c_{1} = "+num2str(c1)+"     c_{2} =  "+num2str(c2)+"      c_{3} =  "+num2str(c3),'FontWeight','bold')
            xlabel('kp')
            ylabel('kd')
+           xlim([min(xVals),max(xVals)])
+           ylim([min(yCalcVals),max(yCalcVals)])
            hold off
            delete(message);
        end
@@ -192,6 +210,17 @@ classdef InvertedPendulum
         
        end
        
+       function [c1,c2,c3] = getParabolaCoefficients(obj,par,ki)
+           %par has three coefficients and it sets the structure of a
+           %parabola of the form y = a1x^2 +a2x+a3
+           a1 = par(1);
+           a2 = par(2);
+           a3 = par(3);
+           
+           c1 = a2/(2*a1);
+           c2 = (a1/4)-ki;
+           c3 = (a2^2/(4*a1))-a3;
+       end
        
            
            

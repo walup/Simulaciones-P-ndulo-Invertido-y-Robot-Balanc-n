@@ -21,8 +21,10 @@ classdef DataProcessor
        
        function obj = DataProcessor(cart,time,input) 
           [obj.t,obj.force,obj.position,obj.angle,obj.energy] = cart.runSimulation(time,input);
+          %Get the natural force 
+          factor = cart.T^2/((cart.M+cart.m)*cart.l);
           %Obtain the normalized force
-          obj.normalizedForce = obj.force*(cart.T^2)/((cart.m+cart.M)*cart.l);
+          obj.normalizedForce = obj.force*factor;
           obj.stability = cart.getStabilityType();
        end
       
@@ -124,7 +126,7 @@ classdef DataProcessor
           %plot(intervalAngle,y,'Color',[68/255,68/255,255/255]);
           %plot(intervalForce,y2,'Color',[238/255,48/255,0])
           xlabel('Valor')
-          legend('Ángulo','Fuerza reescalada')
+          legend('Ángulo','Fuerza normalizada')
           hold off
        end
        
@@ -167,7 +169,7 @@ classdef DataProcessor
           subplot(4,2,[3,5])
           h = bodeplot(cart.angleFunction);
           options = getoptions(h);
-          options.Title.String = 'Diagrama de Bode';
+          options.Title.String = 'Diagrama de Bode de G_{loop,\theta} (s)';
           options.Title.FontSize = 10;
           options.XLabel.String = 'Frecuencia';
           options.XLabel.FontSize = 10;
@@ -181,7 +183,7 @@ classdef DataProcessor
           title('Distribuciones')
           obj.drawDistribution();
           p = get(gca,'Position');
-          p(2) = p(2)-0.08;
+          p(2) = p(2)-0.06;
           set(gca,'Position',p);
           hold off 
           

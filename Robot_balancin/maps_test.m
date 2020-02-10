@@ -1,6 +1,6 @@
 %% Maps test
 % Homeostatic map
-generator = MapProcessor(10,200,20,60,robot);
+generator = MapProcessor(100,250,20,60,robot);
 %%
 [normAngle,normTorque,alphaH] = generator.getHomeostaticMap(60,@(x)heaviside(x));
 %%
@@ -23,6 +23,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -37,6 +40,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -50,6 +56,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -67,6 +76,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -81,6 +93,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -94,6 +109,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -111,6 +129,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
@@ -127,6 +148,9 @@ ylabel('kd')
 colorbar;
 set(gca,'YDir','normal')
 plot(pData,parVec,'Color','red');
+text(105,50,'Subamortiguado');
+text(200,50,'Sobreamortiguado')
+text(155,50,'Crítico \rightarrow');
 xlim(xVec)
 ylim(yVec)
 hold off
